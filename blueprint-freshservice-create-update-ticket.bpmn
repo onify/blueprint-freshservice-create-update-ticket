@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1m70y72" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.10.0">
+  <bpmn:process id="blueprint-freshservice-create-update-ticket" name="Onify Blueprint: Create and update ticket in Freshservice" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" name="Create and update ticket">
+      <bpmn:outgoing>Flow_1fye4fs</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="Event_07hul8z" name="Ticket created and updated">
+      <bpmn:incoming>Flow_1heif62</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1fye4fs" sourceRef="StartEvent_1" targetRef="Activity_0pihz18" />
+    <bpmn:sequenceFlow id="Flow_03uthwj" sourceRef="Activity_0pihz18" targetRef="createticket" />
+    <bpmn:scriptTask id="Activity_0pihz18" name="Define Freshservice settings" scriptFormat="js">
+      <bpmn:incoming>Flow_1fye4fs</bpmn:incoming>
+      <bpmn:outgoing>Flow_03uthwj</bpmn:outgoing>
+      <bpmn:script>environment.variables.freshservice = {
+  apiUrl: 'https://&lt;NAME&gt;.freshservice.com/api/v2',    
+  authorization: 'Basic &lt;BASE64 ENCODED API TOKEN&gt;'
+};
+next();</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:serviceTask id="createticket" name="Create ticket in Freshservice">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="throwHttpErrors">${false}</camunda:inputParameter>
+            <camunda:inputParameter name="json">
+              <camunda:map>
+                <camunda:entry key="description">Hello!</camunda:entry>
+                <camunda:entry key="subject">Hello world</camunda:entry>
+                <camunda:entry key="email">noreply@onify.co</camunda:entry>
+                <camunda:entry key="priority">${1}</camunda:entry>
+                <camunda:entry key="status">${2}</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:inputParameter name="responseType">json</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Authorization">${environment.variables.freshservice.authorization}</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="url">${environment.variables.freshservice.apiUrl}/tickets</camunda:inputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>httpRequest</camunda:connectorId>
+        </camunda:connector>
+        <camunda:inputOutput>
+          <camunda:outputParameter name="ticketId">${content.output.body.ticket.id}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_03uthwj</bpmn:incoming>
+      <bpmn:outgoing>Flow_02q54mf</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_02q54mf" sourceRef="createticket" targetRef="updateticket" />
+    <bpmn:serviceTask id="updateticket" name="Update ticket in Freshservice">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="throwHttpErrors">${true}</camunda:inputParameter>
+            <camunda:inputParameter name="json">
+              <camunda:map>
+                <camunda:entry key="description">Testing updating description</camunda:entry>
+                <camunda:entry key="status">${3}</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="method">PUT</camunda:inputParameter>
+            <camunda:inputParameter name="responseType">json</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Authorization">Basic WDNiZHdLeDdSNXJSQmtQVnQ2VDpY</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="url">${environment.variables.freshservice.apiUrl}/tickets/${environment.output.ticketId}</camunda:inputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>httpRequest</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_02q54mf</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ua1o1r</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0ua1o1r" sourceRef="updateticket" targetRef="addnote" />
+    <bpmn:serviceTask id="addnote" name="Add note for ticket in Freshservice">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="throwHttpErrors">${true}</camunda:inputParameter>
+            <camunda:inputParameter name="json">
+              <camunda:map>
+                <camunda:entry key="body">Test adding note</camunda:entry>
+                <camunda:entry key="incoming">${true}</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:inputParameter name="responseType">json</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="Authorization">Basic WDNiZHdLeDdSNXJSQmtQVnQ2VDpY</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="url">${environment.variables.freshservice.apiUrl}/tickets/${environment.output.ticketId}/notes</camunda:inputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>httpRequest</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0ua1o1r</bpmn:incoming>
+      <bpmn:outgoing>Flow_1heif62</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1heif62" sourceRef="addnote" targetRef="Event_07hul8z" />
+    <bpmn:textAnnotation id="TextAnnotation_03cap6y">
+      <bpmn:text>Please update with your own Freshservice settings</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1kxqjrx" sourceRef="Activity_0pihz18" targetRef="TextAnnotation_03cap6y" />
+    <bpmn:textAnnotation id="TextAnnotation_1osx29l">
+      <bpmn:text>Update json map with your data</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_02aulis" sourceRef="createticket" targetRef="TextAnnotation_1osx29l" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="blueprint-freshservice-create-update-ticket">
+      <bpmndi:BPMNEdge id="Flow_1heif62_di" bpmnElement="Flow_1heif62">
+        <di:waypoint x="880" y="207" />
+        <di:waypoint x="952" y="207" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ua1o1r_di" bpmnElement="Flow_0ua1o1r">
+        <di:waypoint x="700" y="207" />
+        <di:waypoint x="780" y="207" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02q54mf_di" bpmnElement="Flow_02q54mf">
+        <di:waypoint x="530" y="207" />
+        <di:waypoint x="600" y="207" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03uthwj_di" bpmnElement="Flow_03uthwj">
+        <di:waypoint x="360" y="207" />
+        <di:waypoint x="430" y="207" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1fye4fs_di" bpmnElement="Flow_1fye4fs">
+        <di:waypoint x="188" y="207" />
+        <di:waypoint x="260" y="207" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="189" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="140" y="232" width="64" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_07hul8z_di" bpmnElement="Event_07hul8z">
+        <dc:Bounds x="952" y="189" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="936" y="232" width="68" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_01yarig_di" bpmnElement="Activity_0pihz18">
+        <dc:Bounds x="260" y="167" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_00zrrni_di" bpmnElement="createticket">
+        <dc:Bounds x="430" y="167" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1b2aydx_di" bpmnElement="updateticket">
+        <dc:Bounds x="600" y="167" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1as7ezt_di" bpmnElement="addnote">
+        <dc:Bounds x="780" y="167" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_03cap6y_di" bpmnElement="TextAnnotation_03cap6y">
+        <dc:Bounds x="360" y="80" width="170" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_1osx29l_di" bpmnElement="TextAnnotation_1osx29l">
+        <dc:Bounds x="530" y="310" width="130" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_1kxqjrx_di" bpmnElement="Association_1kxqjrx">
+        <di:waypoint x="346" y="167" />
+        <di:waypoint x="388" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_02aulis_di" bpmnElement="Association_02aulis">
+        <di:waypoint x="514" y="247" />
+        <di:waypoint x="567" y="310" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
