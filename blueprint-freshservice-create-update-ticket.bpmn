@@ -66,7 +66,7 @@ next();</bpmn:script>
             <camunda:inputParameter name="responseType">json</camunda:inputParameter>
             <camunda:inputParameter name="headers">
               <camunda:map>
-                <camunda:entry key="Authorization">Basic WDNiZHdLeDdSNXJSQmtQVnQ2VDpY</camunda:entry>
+                <camunda:entry key="Authorization">${environment.variables.freshservice.authorization}</camunda:entry>
               </camunda:map>
             </camunda:inputParameter>
             <camunda:inputParameter name="url">${environment.variables.freshservice.apiUrl}/tickets/${environment.output.ticketId}</camunda:inputParameter>
@@ -93,7 +93,7 @@ next();</bpmn:script>
             <camunda:inputParameter name="responseType">json</camunda:inputParameter>
             <camunda:inputParameter name="headers">
               <camunda:map>
-                <camunda:entry key="Authorization">Basic WDNiZHdLeDdSNXJSQmtQVnQ2VDpY</camunda:entry>
+                <camunda:entry key="Authorization">${environment.variables.freshservice.authorization}</camunda:entry>
               </camunda:map>
             </camunda:inputParameter>
             <camunda:inputParameter name="url">${environment.variables.freshservice.apiUrl}/tickets/${environment.output.ticketId}/notes</camunda:inputParameter>
