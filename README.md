@@ -5,7 +5,7 @@
 
 # Onify Blueprint: Create and update ticket in Freshservice
 
-[Freshservice](https://freshservice.com/) is a modern ITSM tool from [Freshworks](https://www.freshworks.com/). This Blueprint shows how to create and update a ticket in Freshservice via REST API.
+[Freshservice](https://freshservice.com/) is a modern ITSM tool from [Freshworks](https://www.freshworks.com/). In this Blueprint we show how to first create a new ticket and then update the same ticket and last but not least we add a note to the ticket. Everyting is done through [Freshservice REST API](https://api.freshservice.com/).
 
 ![Onify Blueprint: Create and update ticket in Freshservice](flow.png "Flow")
 
